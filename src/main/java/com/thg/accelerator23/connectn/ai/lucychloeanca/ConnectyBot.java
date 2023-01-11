@@ -14,7 +14,13 @@ public class ConnectyBot extends Player {
 
   @Override
   public int makeMove(Board board) {
-    int position = getOptimalCol(board);
+    System.out.println("getting column");
+    int position = 0;
+    try {
+      position = getOptimalCol(board);
+    } catch (InvalidMoveException e) {
+      throw new RuntimeException(e);
+    }
     //TODO: some crazy analysis
     //TODO: make sure said analysis uses less than 2G of heap and returns within 10 seconds on whichever machine is running it
     return position;
@@ -51,66 +57,84 @@ public class ConnectyBot extends Player {
 
   private int columnScoreCalculator(Board board, int columnNumber){
     int score = 0;
-    try {
-      Board possibleNewBoard = new Board(board, columnNumber, getCounter());
-      GameConfig newConfig = possibleNewBoard.getConfig();
-      LCABoardAnalyser boardAnalyser = new LCABoardAnalyser(newConfig);
-      if (boardAnalyser.calculateGameState(possibleNewBoard).isEnd()) {
-        Counter winner = boardAnalyser.calculateGameState(possibleNewBoard).getWinner();
-        if (winner.equals(this.getCounter())) {
-          score = 1;
-        }else {
-          score = -1;
-        }
-      } else {
-        score = 0;
+    GameConfig newConfig = board.getConfig();
+    LCABoardAnalyser boardAnalyser = new LCABoardAnalyser(newConfig);
+    if (boardAnalyser.calculateGameState(board).isEnd()) {
+      Counter winner = boardAnalyser.calculateGameState(board).getWinner();
+      if (winner.equals(this.getCounter())) {
+        score = 1;
+      }else {
+        score = -1;
       }
-
-    }catch (InvalidMoveException e){
-      score = -100000000;
+    } else {
+      score = 0;
     }
 
     return score;
   }
 
-  private int miniMax (int position, int depth, boolean maximisingPlayer, Board board){
-    if (depth == 0 || new LCABoardAnalyser(board.getConfig()).calculateGameState(board).isEnd()) {
-      return columnScoreCalculator(board, position);
+  private int miniMax (int position, int depth, boolean maximisingPlayer, Board board) throws InvalidMoveException {
+    boolean gameOver = new LCABoardAnalyser(board.getConfig()).calculateGameState(board).isEnd();
+    Counter counter = Counter.O;
+    if (maximisingPlayer){
+      counter = this.getCounter();
     }
+    else {
+      switch (this.getCounter()){
+      case O -> counter = Counter.X;
+        case X -> counter = Counter.O;
+    }}
+    Board possibleNewBoard = new Board(board, position, counter);
+    if (depth == 0 || gameOver) {
+      return columnScoreCalculator(possibleNewBoard, position);
+    }
+    List<Integer> availableCol = getAvailableCol(possibleNewBoard);
     if (maximisingPlayer){
       int maxEval = -1000000;
-      for (int i = 0; i < board.getConfig().getWidth(); i++){
-        int eval = miniMax(i , depth - 1, false, board);
+      for (int column:availableCol
+           ) {
+        int eval = miniMax(column , depth - 1, false, possibleNewBoard);
         maxEval = Math.max(maxEval, eval);
       }
       return maxEval;
     } else {
       int minEval = 1000000;
-      for (int i = 0; i < board.getConfig().getWidth(); i++){
-        int eval = miniMax(i, depth -1, true, board);
+      for (int column:availableCol
+      ) {
+        int eval = miniMax(column, depth -1, true, possibleNewBoard);
         minEval = Math.min(minEval, eval);
       }
       return minEval;
     }
   }
 
-  private Map<Integer, Integer> getAllColScores(Board board){
+  private Map<Integer, Integer> getAllColScores(Board board) throws InvalidMoveException {
     Map<Integer, Integer> colScores = new HashMap<>();
     List<Integer> availableCol = getAvailableCol(board);
-    availableCol.stream().forEach((colNumber) -> {
-      int score = miniMax(colNumber, 3, true, board);
+    for (int colNumber: availableCol
+         ) {
+      int score = miniMax(colNumber, 4, true, board);
       colScores.put(colNumber, score);
-    });
+    }
     return colScores;
   }
 
-  private int getOptimalCol(Board board){
+  private int getOptimalCol(Board board) throws InvalidMoveException {
     Map<Integer, Integer> colScores = getAllColScores(board);
+    System.out.println(colScores);
     int highestScoringCol = colScores.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
     int highestScore = colScores.get(highestScoringCol);
     if (highestScore>0) {
+      System.out.println("hi");
+      System.out.println(highestScore);
+      System.out.println(highestScoringCol);
       return highestScoringCol;
-    }else {
+    } else if (highestScore == -1) {
+      System.out.println("hi");
+      System.out.println(highestScore);
+      System.out.println(highestScoringCol);
+      return highestScoringCol;
+    } else {
       System.out.println("random");
       return randomMove(board);
     }
