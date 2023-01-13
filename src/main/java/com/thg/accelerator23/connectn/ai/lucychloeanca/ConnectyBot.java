@@ -15,7 +15,7 @@ public class ConnectyBot extends Player {
 
     ColumnScore optimisedCol;
     try {
-      optimisedCol = miniMax(3, true, board, 0);
+      optimisedCol = miniMax(4, true, board, 0);
     } catch (InvalidMoveException e) {
       throw new RuntimeException(e);
     }
