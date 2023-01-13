@@ -15,11 +15,21 @@ public class ConnectyBot extends Player {
 
     ColumnScore optimisedCol;
     try {
-      optimisedCol = miniMax(4, true, board, 0);
+      int randint = randomMove(board);
+      optimisedCol = miniMax(4, true, board, randint);
     } catch (InvalidMoveException e) {
       throw new RuntimeException(e);
     }
     return optimisedCol.getColumn();
+  }
+
+
+  private int randomMove(Board board) {
+    int position = new Random().nextInt(0, 10);
+    if (!isSpaceAvailable(board, position)){
+      position = randomMove(board);
+    }
+    return position;
   }
 
   private boolean isSpaceAvailable(Board board, int position){
