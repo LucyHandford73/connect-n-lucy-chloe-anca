@@ -8,6 +8,7 @@
     <artifactId>${yourteam}</artifactId>
     <version>3.0</version>
 
+
     <repositories>
         <repository>
             <id>jitpack.io</id>
