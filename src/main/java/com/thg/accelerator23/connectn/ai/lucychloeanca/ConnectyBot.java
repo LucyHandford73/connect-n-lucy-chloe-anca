@@ -28,10 +28,7 @@ public class ConnectyBot extends Player {
 
 
   private int randomMove(Board board) {
-    int position = new Random().nextInt(0, 10);
-    if (!isSpaceAvailable(board, position)){
-      position = randomMove(board);
-    }
+    int position = getAvailableCol(board).get(new Random().nextInt(getAvailableCol(board).size()));
     return position;
   }
 

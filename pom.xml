@@ -6,7 +6,8 @@
     <groupId>com.thg.accelerator23.connectn.ai</groupId>
     <!-- do not change this -->
     <artifactId>${yourteam}</artifactId>
-    <version>2.1</version>
+    <version>3.0</version>
+
 
     <repositories>
         <repository>
