@@ -92,7 +92,7 @@ public class ConnectyBot extends Player {
         centerList.add(currentCounter);
       }
       int centerCount = Collections.frequency(centerList, counter);
-      score = score + (centerCount * 2);
+      score = score + (centerCount * 3);
     }
 
     return score;
