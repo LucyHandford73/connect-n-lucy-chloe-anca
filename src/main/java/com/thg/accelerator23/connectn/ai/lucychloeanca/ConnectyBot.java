@@ -27,10 +27,7 @@ public class ConnectyBot extends Player {
 
 
   private int randomMove(Board board) {
-    int position = new Random().nextInt(0, 10);
-    if (!isSpaceAvailable(board, position)){
-      position = randomMove(board);
-    }
+    int position = getAvailableCol(board).get(new Random().nextInt(getAvailableCol(board).size()));
     return position;
   }
 
@@ -95,7 +92,7 @@ public class ConnectyBot extends Player {
         centerList.add(currentCounter);
       }
       int centerCount = Collections.frequency(centerList, counter);
-      score = score + (centerCount * 3);
+      score = score + (centerCount * 2);
     }
 
     return score;
